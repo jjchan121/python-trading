@@ -102,6 +102,7 @@ class PipeLine(DataSeries):
         self.__curr_timestamp = None
         self._flush_and_create()
         self.inputs = []
+        self.cache = OrderedDict()
         # self.df = pd.DataFrame(index=range(self.length), columns=input_names)
         # self.cache = {} # key is input name, value is numpy array
         # self.update_all()
@@ -164,9 +165,12 @@ class PipeLine(DataSeries):
             self.cache[data_name] = self.inputs[j].get_by_idx(
                 keys=self.input_keys,
                 idx=slice(-self.length, None, None))
-            # self.df[data_name] = self.inputs[j].get_by_idx(
-            #     keys=self.input_keys,
-            #     idx=slice(-self.length, None, None))
+
+        if self.all_filled():
+            result = {}
+            result['timestamp'] = data['timestamp']
+            result[PipeLine.VALUE] = self.cache
+            self.add(result)
 
     def numPipes(self):
         return self.numPipes

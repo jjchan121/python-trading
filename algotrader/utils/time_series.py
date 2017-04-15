@@ -124,6 +124,9 @@ class DataSeries(Persistable, Startable, HasId):
             return df[self._get_key(keys, self.keys)]
         return df
 
+    def get_panel(self):
+        return pd.Panel({datum['timestamp']: datum['value'] for datum in self.data_list})
+
     def get_series(self, keys):
         df = self.get_data_frame(keys)
         keys = self._get_key(keys, self.keys)

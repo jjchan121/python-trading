@@ -68,7 +68,10 @@ class Strategy(PositionHolder, ExecutionEventHandler, MarketDataEventHandler, Pe
         self.feed = self.app_context.provider_mgr.get(self.app_config.feed_id) if self.app_config else None
         self.broker = self.app_context.provider_mgr.get(self.app_config.broker_id)
 
-        self.instruments = self.ref_data_mgr.get_insts(self.app_context.app_config.instrument_ids)
+        if not self.app_context.app_config.instrument_ids:
+            self.instruments = self.ref_data_mgr.get_all_insts()
+        else :
+            self.instruments = self.ref_data_mgr.get_insts(self.app_context.app_config.instrument_ids)
         self.clock = self.app_context.clock
         self.event_subscription = EventBus.data_subject.subscribe(self.on_next)
 
