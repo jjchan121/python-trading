@@ -185,3 +185,50 @@ class BacktestingConfig(TradingConfig):
         self.portfolio_initial_cash = portfolio_initial_cash
         self.from_date = from_date
         self.to_date = to_date
+
+
+class ScreenConfig(ApplicationConfig):
+
+    __slots__ = (
+        'pipe_id',
+        'instrument_ids',
+        'subscription_types',
+        'feed_id',
+        'pipe_configs',
+        'from_date',
+        'to_date'
+    )
+
+    def __init__(self, id=None, pipe_id=None,
+                 instrument_ids=None,
+                 subscription_types=None,
+                 feed_id=None,
+                 from_date=None,
+                 to_date=None,
+                 pipe_configs=None,
+                 ref_data_mgr_type=RefDataManager.InMemory,
+                 clock_type = Clock.Simulation,
+                 persistence_config=None,
+                 provider_configs=None):
+        super(ScreenConfig, self).__init__(id = id if id else pipe_id,
+                                           ref_data_mgr_type=ref_data_mgr_type,
+                                           clock_type=clock_type,
+                                           persistence_config= persistence_config,
+                                           provider_configs=provider_configs)
+        self.from_date = from_date
+        self.to_date = to_date
+        self.pipe_id = pipe_id
+        self.pipe_configs = pipe_configs
+        self.instrument_ids = instrument_ids
+        if not isinstance(self.instrument_ids, (list, tuple)):
+            self.instrument_ids = [self.instrument_ids]
+
+        self.subscription_types = subscription_types if subscription_types else [
+            BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)]
+        if not isinstance(self.subscription_types, (list, tuple)):
+            self.subscription_types = [self.subscription_types]
+
+        self.feed_id = feed_id
+        self.clock_type = clock_type
+
+
