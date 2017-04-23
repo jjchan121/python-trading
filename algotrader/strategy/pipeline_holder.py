@@ -4,7 +4,7 @@ from algotrader.event.event_handler import MarketDataEventHandler
 from algotrader.provider.persistence import Persistable
 from algotrader.provider.subscription import SubscriptionKey, HistDataSubscriptionKey, MarketDataSubscriber
 from algotrader.trading.position import PositionHolder
-from algotrader.config.app import BacktestingConfig
+from algotrader.config.app import BacktestingConfig, ScreenConfig
 
 
 class PipelineHolder(PositionHolder, MarketDataEventHandler, Persistable, Startable, HasId, MarketDataSubscriber):
@@ -58,7 +58,7 @@ class PipelineHolder(PositionHolder, MarketDataEventHandler, Persistable, Starta
         self.ref_data_mgr = self.app_context.ref_data_mgr
         self.feed = self.app_context.provider_mgr.get(self.app_config.feed_id) if self.app_config else None
 
-        if not self.app_context.app_config.instrument_ids:
+        if not self.app_context.app_config.instrument_ids : #or self.app_context.app_config.instrument_ids is not None:
             self.instruments = self.ref_data_mgr.get_all_insts()
         else :
             self.instruments = self.ref_data_mgr.get_insts(self.app_context.app_config.instrument_ids)
@@ -69,6 +69,9 @@ class PipelineHolder(PositionHolder, MarketDataEventHandler, Persistable, Starta
             self.feed.start(app_context)
 
         if isinstance(self.app_config, BacktestingConfig):
+            self.subscript_market_data(self.feed, self.instruments, self.app_config.subscription_types,
+                                       self.app_config.from_date, self.app_config.to_date)
+        elif isinstance(self.app_config, ScreenConfig):
             self.subscript_market_data(self.feed, self.instruments, self.app_config.subscription_types,
                                        self.app_config.from_date, self.app_config.to_date)
         else:

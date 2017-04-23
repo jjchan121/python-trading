@@ -14,7 +14,7 @@ from algotrader.trading.context import ApplicationContext
 from algotrader.trading.ref_data import RefDataManager
 from algotrader.utils.clock import Clock
 from algotrader.provider.broker import Broker
-from algotrader.config.feed import CSVFeedConfig
+from algotrader.config.feed import CSVFeedConfig, PandasMemoryDataFeedConfig
 from algotrader.config.persistence import MongoDBConfig
 from algotrader.config.builder import *
 from algotrader.strategy.pipeline_holder import PipelineHolder
@@ -53,6 +53,8 @@ class AlphaFormulaScreen(PipelineHolder):
         closes = PipeLine('closes', bars, input_keys='close')
         volumes = PipeLine('volumes', bars, input_keys='volume')
 
+        closes.start(app_context)
+        volumes.start(app_context)
         self.pipelines = {'closes' : closes,
                           'volumes' : volumes}
 
@@ -63,7 +65,7 @@ class AlphaFormulaScreen(PipelineHolder):
 
 def main():
 
-    file = "/Users/jchan/workspace/data/etf.pkl"
+    file = "/home/jason/data/etf.pkl"
     import pandas as pd
     import pickle
     df_dict = {}
@@ -71,25 +73,33 @@ def main():
     with open(file, 'rb') as f:
         df_dict = pickle.load(f)
 
+    for k,df in df_dict.iteritems():
+        df['Symbol'] = k
+        df['BarSize'] = int(BarSize.D1)
+
     screen = AlphaFormulaScreen(pipe_id='alpha_formula1', pipe_configs=None)
 
-    screen_config = ScreenConfig(id="test_screen", pipe_id="pipe1", instrument_ids=None,
+    screen_config = ScreenConfig(id="test_screen", pipe_id="pipe1",
+                                 instrument_ids=[3348, 8984, 5998],
                                  subscription_types=[
                                      BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)
                                  ],
                                  feed_id=Feed.PandasMemory,
+                                 #feed_id=Feed.CSV,
                                  from_date=date(2010,1,1),
                                  to_date=date.today(),
                                  pipe_configs=None,
                                  ref_data_mgr_type=RefDataManager.DB,
                                  clock_type=Clock.Simulation,
-                                 provider_configs=PandasMemoryDataFeedConfig(df_dict))
+                                 persistence_config= backtest_in_memory_config(),
+                                 provider_configs=[MongoDBConfig(), PandasMemoryDataFeedConfig(df_dict)])
+                                 #provider_configs=[MongoDBConfig(), CSVFeedConfig(path='../../data/tradedata')])
 
     app_context = ApplicationContext(app_config=screen_config)
 
     runner = PipeLineRunner(screen)
     runner.start(app_context)
-    print runner.pipeline_holder
+    print runner.pipeline_holder.pipelines["closes"].get_panel()
 
 
 if __name__ == "__main__":
