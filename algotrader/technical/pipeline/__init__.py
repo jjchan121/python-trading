@@ -136,12 +136,13 @@ class PipeLine(DataSeries):
         for input in self.inputs:
             data_list = input.get_data()
             for data in data_list:
-                if self.input_keys:
-                    filtered_data = {key: data[key] for key in self.input_keys}
-                    filtered_data['timestamp'] = data['timestamp']
-                    self.on_update(filtered_data)
-                else:
-                    self.on_update(data)
+                self.on_update(data)
+                # if self.input_keys:
+                #     filtered_data = {key: data[key] for key in self.input_keys}
+                #     filtered_data['timestamp'] = data['timestamp']
+                #     self.on_update(filtered_data)
+                # else:
+                #     self.on_update(data)
 
     def all_filled(self):
         """
@@ -167,6 +168,7 @@ class PipeLine(DataSeries):
                 idx=slice(-self.length, None, None))
 
         if self.all_filled():
+            logger.debug("[%s] all_filled %s" % (self.__class__.__name__, data))
             result = {}
             result['timestamp'] = data['timestamp']
             result[PipeLine.VALUE] = self.cache

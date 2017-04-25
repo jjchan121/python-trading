@@ -85,7 +85,9 @@ class PandasMemoryDataFeed(Feed):
                 dfs.append(df)
 
         if len(dfs) > 0:
-            self.df = pd.concat(dfs).sort_index(0, ascending=True)
+            df = pd.concat(dfs).sort_index(0, ascending=True)
+            logger.debug("[%s] __load_data df.index = %s" % (self.__class__.__name__, df.index))
+
             for index, row in df.iterrows():
                 inst = self.ref_data_mgr.get_inst(symbol=row['Symbol'])
                 range = sub_key_range[inst.inst_id]

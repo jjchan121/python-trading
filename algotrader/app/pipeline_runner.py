@@ -19,6 +19,7 @@ from algotrader.config.persistence import MongoDBConfig
 from algotrader.config.builder import *
 from algotrader.strategy.pipeline_holder import PipelineHolder
 from algotrader.technical.pipeline import PipeLine
+from algotrader.technical.ma import SMA
 
 class PipeLineRunner(Application):
     def __init__(self, pipeline_holder):
@@ -41,22 +42,32 @@ class AlphaFormulaScreen(PipelineHolder):
     def _start(self, app_context, **kwargs):
         super(AlphaFormulaScreen, self)._start(app_context)
 
-        # if not self.app_context.app_config.instrument_ids:
-        #     self.instruments = self.ref_data_mgr.get_all_insts()
-        # else :
-        #     self.instruments = self.ref_data_mgr.get_insts(self.app_context.app_config.instrument_ids)
-        self.instruments = self.ref_data_mgr.get_all_insts()
+        if not self.app_context.app_config.instrument_ids:
+            self.instruments = self.ref_data_mgr.get_all_insts()
+        else :
+            self.instruments = self.ref_data_mgr.get_insts(self.app_context.app_config.instrument_ids)
+        # self.instruments = self.ref_data_mgr.get_all_insts()
 
         bars = [self.app_context.inst_data_mgr.get_series(
-            "Bar.%s.Time.300" % i.inst_id) for i in self.instruments]
+            "Bar.%s.Time.86400" % i.inst_id) for i in self.instruments]
 
+        for b in bars:
+            b.start(app_context)
+
+        # smas = [SMA(bar, 'close', length=5) for bar in bars]
+        # for s in smas:
+        #     s.start(app_context)
+
+        # sma5 = PipeLine('SMA5', smas, input_keys='close')
         closes = PipeLine('closes', bars, input_keys='close')
-        volumes = PipeLine('volumes', bars, input_keys='volume')
-
         closes.start(app_context)
-        volumes.start(app_context)
-        self.pipelines = {'closes' : closes,
-                          'volumes' : volumes}
+        #volumes = PipeLine('volumes', bars, input_keys='volume')
+
+        # sma5.start(app_context)
+        #closes.start(app_context)
+        #volumes.start(app_context)
+        self.pipelines = {'closes' : closes}
+                          #'volumes' : volumes}
 
         # super(AlphaFormulaScreen, self).pipelines = {'closes' : closes,
         #                                              'volumes' : volumes}
@@ -86,7 +97,7 @@ def main():
                                  ],
                                  feed_id=Feed.PandasMemory,
                                  #feed_id=Feed.CSV,
-                                 from_date=date(2010,1,1),
+                                 from_date=date(2011,12,1),
                                  to_date=date.today(),
                                  pipe_configs=None,
                                  ref_data_mgr_type=RefDataManager.DB,
