@@ -12,7 +12,6 @@ from algotrader.technical.pipeline import PipeLine
 from algotrader.technical.pipeline.rank import Rank
 from algotrader.technical.pipeline.cross_sessional_apply import Average, Abs, Tail, Sign, DecayLinear, Scale
 from algotrader.technical.pipeline.cross_sessional_apply import Sum as GSSum
-from algotrader.technical.pipeline.make_vector import MakeVector
 from algotrader.technical.pipeline.pairwise import Minus
 from algotrader.technical.talib_wrapper import SMA
 from algotrader.config.app import ApplicationConfig
@@ -62,17 +61,17 @@ class PipelineTest(TestCase):
 
         avg = Average([bar0, bar1, bar2, bar3], input_key='close')
         gssum = GSSum([bar0, bar1, bar2, bar3], input_key='close')
-        basket = MakeVector([bar0, bar1, bar2, bar3], input_key='close')
+        basket = PipeLine('basket', [bar0, bar1, bar2, bar3], input_key='close')
         # TODO: the name printed by pipeline now break the "parse" machnism so we have to review it
         self.assertEquals("Average('bar0','bar1','bar2','bar3',close)", avg.name)
         self.assertEquals("Sum('bar0','bar1','bar2','bar3',close)", gssum.name)
-        self.assertEquals("MakeVector('bar0','bar1','bar2','bar3',close)", basket.name)
+        # self.assertEquals("MakeVector('bar0','bar1','bar2','bar3',close)", basket.name)
 
         bar4 = self.app_context.inst_data_mgr.get_series("bar4")
         bar5 = self.app_context.inst_data_mgr.get_series("bar5")
         bar6 = self.app_context.inst_data_mgr.get_series("bar6")
         bar7 = self.app_context.inst_data_mgr.get_series("bar7")
-        basket2 = MakeVector([bar4, bar5, bar6, bar7], input_key='close')
+        basket2 = PipeLine('basket2', [bar4, bar5, bar6, bar7], input_key='close')
 
         cross_basket_spread = Minus(basket2, basket)
 

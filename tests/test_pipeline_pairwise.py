@@ -7,7 +7,6 @@ import numpy as np
 import datetime
 from algotrader.technical import Indicator
 from algotrader.technical.pipeline import PipeLine
-from algotrader.technical.pipeline.make_vector import MakeVector
 from algotrader.technical.pipeline.pairwise import Plus, Minus, Times, Divides, Greater, PairCorrelation
 from algotrader.technical.talib_wrapper import SMA
 from algotrader.utils.time_series import DataSeries
@@ -131,8 +130,8 @@ class PairwiseTest(TestCase):
         bar2.start(self.app_context)
         bar3.start(self.app_context)
 
-        vec0 = MakeVector([bar0, bar1], input_key='close')
-        vec1 = MakeVector([bar2, bar3], input_key='close')
+        vec0 = PipeLine('vec0', [bar0, bar1], input_key='close')
+        vec1 = PipeLine('vec1', [bar2, bar3], input_key='close')
 
         vec0.start(self.app_context)
         vec1.start(self.app_context)

@@ -19,7 +19,6 @@ from algotrader.provider.subscription import BarSubscriptionType
 from algotrader.technical import Indicator
 from algotrader.technical.ma import SMA
 from algotrader.technical.pipeline.rank import Rank
-from algotrader.technical.pipeline.make_vector import MakeVector
 from algotrader.trading.account import Account
 from algotrader.trading.order import Order
 from algotrader.trading.position import Position
