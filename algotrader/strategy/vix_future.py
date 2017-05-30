@@ -10,7 +10,6 @@ from algotrader.strategy.strategy import Strategy
 from algotrader.technical.roc import ROC
 from algotrader.technical.pipeline import PipeLine
 from algotrader.technical.pipeline.pairwise import PairCorrelation
-from algotrader.technical.pipeline.make_vector import MakeVector
 from algotrader.technical.pipeline.rank import Rank
 from algotrader.technical.pipeline.cross_sessional_apply import Delta, Log
 from algotrader.technical.pipeline.pairwise import Minus, Divides
@@ -55,8 +54,6 @@ class VIXFuture(Strategy):
 
         # self.trading_mode = "contango"
 
-        # self.ts = MakeVector(self.bars, input_key='close')
-        # self.ts.start(app_context)
 
         # if not self.app_context.inst_data_mgr.has_series(self.ts.name) :
         #     self.app_context.inst_data_mgr.add_series(self.ts, raise_if_duplicate=True)

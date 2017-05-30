@@ -47,15 +47,19 @@ class PipeLine(DataSeries):
 
         return ",".join(str(part) for part in parts)
 
-    def __init__(self, name, inputs, input_keys, length=None, desc=None, **kwargs):
+    def __init__(self, name, inputs, input_keys, length=None, desc=None, fire_on_all = True, **kwargs):
+        """
+        :param name: Name of the Pipeline to be created
+        :param inputs: list of DataSeries that want to sync to one Pipeline
+        :param input_keys: Input Keys
+        :param length: Lookback period of each inputs in constructing Pipeline
+        :param desc: Description
+        :param fire_on_all: If set to True, only fire a data slice when all inputs has updated and create one synced value
+                            If set to False, whenever an input has changed timestamp, one update will be created with missing
+                            input as Nan
+        :param kwargs:
+        """
         super(PipeLine, self).__init__(name=name, keys=None, desc=desc, **kwargs)
-        # f = lambda i: i \
-        #     if isinstance(i, DataSeries) or isinstance(i, Indicator) \
-        #     else inst_data_mgr.get_series(i)
-        # if isinstance(inputs, list):
-        #     self.inputs = [f(i) for i in inputs]
-        # else:
-        #     self.inputs = f(inputs)
 
         input_names = []
         self.input_names_and_series = OrderedDict()
@@ -102,7 +106,8 @@ class PipeLine(DataSeries):
         self.__curr_timestamp = None
         self._flush_and_create()
         self.inputs = []
-        self.cache = OrderedDict()
+        self.cache = {} # OrderedDict()
+        self.fire_on_all = fire_on_all
         # self.df = pd.DataFrame(index=range(self.length), columns=input_names)
         # self.cache = {} # key is input name, value is numpy array
         # self.update_all()
@@ -130,7 +135,16 @@ class PipeLine(DataSeries):
 
     def _flush_and_create(self):
         # self.df = pd.DataFrame(index=range(self.length), columns=self.input_names)
-        self.cache = OrderedDict(zip(self.input_names, [None for i in range(len(self.input_names))]))
+        # self.cache = OrderedDict(zip(self.input_names, [None for i in range(len(self.input_names))]))
+        self.cache = {k : None for k in self.input_names}
+
+    def _submit_cache(self):
+        logger.debug("[%s] _submit_cache" % self.__class__.__name__)
+        result = {}
+        result['timestamp'] = self.__curr_timestamp
+        result[PipeLine.VALUE] = self.cache
+        self.add(result)
+
 
     def update_all(self):
         for input in self.inputs:
@@ -158,6 +172,8 @@ class PipeLine(DataSeries):
         logger.debug("[%s] on_update %s" % (self.__class__.__name__, data))
         if data['timestamp'] != self.__curr_timestamp:
             self.__curr_timestamp = data['timestamp']
+            if not self.fire_on_all:
+                self._submit_cache()
             self._flush_and_create()
 
         data_name = data['name']
@@ -167,12 +183,13 @@ class PipeLine(DataSeries):
                 keys=self.input_keys,
                 idx=slice(-self.length, None, None))
 
-        if self.all_filled():
-            logger.debug("[%s] all_filled %s" % (self.__class__.__name__, data))
-            result = {}
-            result['timestamp'] = data['timestamp']
-            result[PipeLine.VALUE] = self.cache
-            self.add(result)
+        if self.fire_on_all and self.all_filled():
+            self._submit_cache()
+            # logger.debug("[%s] all_filled %s" % (self.__class__.__name__, data))
+            # result = {}
+            # result['timestamp'] = data['timestamp']
+            # result[PipeLine.VALUE] = self.cache
+            # self.add(result)
 
     def numPipes(self):
         return self.numPipes

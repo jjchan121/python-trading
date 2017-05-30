@@ -1,7 +1,7 @@
-
+from __future__ import absolute_import # IntelliJ/ Pycharm workaround http://stackoverflow.com/questions/38569992/pycharm-import-runtimewarning-after-updating-to-2016-2
 import math
 from gevent.ares import result
-
+import collections
 import talib
 from datetime import datetime
 from unittest import TestCase
@@ -12,7 +12,6 @@ from algotrader.technical.pipeline import PipeLine
 from algotrader.technical.pipeline.rank import Rank
 from algotrader.technical.pipeline.cross_sessional_apply import Average, Abs, Tail, Sign, DecayLinear, Scale
 from algotrader.technical.pipeline.cross_sessional_apply import Sum as GSSum
-from algotrader.technical.pipeline.make_vector import MakeVector
 from algotrader.technical.pipeline.pairwise import Minus
 from algotrader.technical.talib_wrapper import SMA
 from algotrader.config.app import ApplicationConfig
@@ -22,6 +21,17 @@ from algotrader.trading.context import ApplicationContext
 class PipelineTest(TestCase):
     def setUp(self):
         self.app_context = ApplicationContext()
+
+    def assertDictEqual(self, d1, d2, msg=None): # assertEqual uses for dicts
+        for k,v1 in d1.iteritems():
+            self.assertIn(k, d2, msg)
+            v2 = d2[k]
+            if(isinstance(v1, collections.Iterable) and
+                   not isinstance(v1, basestring)):
+                self.assertItemsEqual(v1, v2, msg)
+            else:
+                self.assertEqual(v1, v2, msg)
+        return True
 
     def test_name(self):
 
@@ -51,17 +61,17 @@ class PipelineTest(TestCase):
 
         avg = Average([bar0, bar1, bar2, bar3], input_key='close')
         gssum = GSSum([bar0, bar1, bar2, bar3], input_key='close')
-        basket = MakeVector([bar0, bar1, bar2, bar3], input_key='close')
+        basket = PipeLine('basket', [bar0, bar1, bar2, bar3], input_key='close')
         # TODO: the name printed by pipeline now break the "parse" machnism so we have to review it
         self.assertEquals("Average('bar0','bar1','bar2','bar3',close)", avg.name)
         self.assertEquals("Sum('bar0','bar1','bar2','bar3',close)", gssum.name)
-        self.assertEquals("MakeVector('bar0','bar1','bar2','bar3',close)", basket.name)
+        # self.assertEquals("MakeVector('bar0','bar1','bar2','bar3',close)", basket.name)
 
         bar4 = self.app_context.inst_data_mgr.get_series("bar4")
         bar5 = self.app_context.inst_data_mgr.get_series("bar5")
         bar6 = self.app_context.inst_data_mgr.get_series("bar6")
         bar7 = self.app_context.inst_data_mgr.get_series("bar7")
-        basket2 = MakeVector([bar4, bar5, bar6, bar7], input_key='close')
+        basket2 = PipeLine('basket2', [bar4, bar5, bar6, bar7], input_key='close')
 
         cross_basket_spread = Minus(basket2, basket)
 
@@ -134,43 +144,48 @@ class PipelineTest(TestCase):
         bar6.start(self.app_context)
         bar7.start(self.app_context)
 
-        basket = MakeVector([bar0, bar1, bar2, bar3], input_key='close')
-        basket2 = MakeVector([bar4, bar5, bar6, bar7], input_key='close')
+        basket = PipeLine('Basket', [bar0, bar1, bar2, bar3], input_keys='close')
+        basket2 = PipeLine('Basket2', [bar4, bar5, bar6, bar7], input_keys='close')
 
         basket.start(self.app_context)
         basket2.start(self.app_context)
 
-        basket_open = MakeVector([bar0, bar1, bar2, bar3], input_key='open')
-        basket_open2 = MakeVector([bar4, bar5, bar6, bar7], input_key='open')
-        cross_basket_spread = Minus(basket2, basket, input_key=PipeLine.VALUE)
+        basket_open = PipeLine('Opens', [bar0, bar1, bar2, bar3], input_keys='open')
+        basket_open2 = PipeLine('Opens2', [bar4, bar5, bar6, bar7], input_keys='open')
+        # cross_basket_spread = Minus(basket2, basket, input_key=PipeLine.VALUE)
 
         basket_open.start(self.app_context)
         basket_open2.start(self.app_context)
-        cross_basket_spread.start(self.app_context)
+        # cross_basket_spread.start(self.app_context)
 
-        nan_arr = np.empty([1,4])
-        nan_arr[:] = np.nan
 
 
         t1 = datetime.datetime.now()
         bar0.add({"timestamp": t1, "close": 80.0, "open": 0})
         # self.assertListEqual(nan_arr.tolist(),  basket.now()["value"])
-        self.__np_assert_almost_equal(nan_arr, np.array(basket.now()["value"]))
+        self.assertTrue(math.isnan(basket.now()))
+        # self.assertEqual(basket.missing_value, basket.now())
+        # self.__np_assert_almost_equal(nan_arr, np.array(basket.now()["value"]))
 
         bar1.add({"timestamp": t1, "close": 95.0, "open": 0})
         # self.assertListEqual(nan_arr.tolist(),  basket.now()["value"])
-        self.__np_assert_almost_equal(nan_arr, basket.now()["value"])
+        self.assertTrue(math.isnan(basket.now()))
+        # self.__np_assert_almost_equal(nan_arr, basket.now()["value"])
 
         bar2.add({"timestamp": t1, "close": 102.0, "open": 0})
+        self.assertTrue(math.isnan(basket.now()))
         # self.assertListEqual(nan_arr.tolist(),  basket.now()["value"])
-        self.__np_assert_almost_equal(nan_arr, np.array(basket.now()["value"]))
+        # self.__np_assert_almost_equal(nan_arr, np.array(basket.now()["value"]))
 
-        # sync_vec = np.array([[80.0, 95.0, 102.0, 105.0]])
-        sync_vec = [[80.0, 95.0, 102.0, 105.0]]
+        basket_slice = {"'bar0'": [80],
+                        "'bar1'": [95.0],
+                        "'bar2'": [102.0],
+                        "'bar3'": [105.0]}
 
         bar3.add({"timestamp": t1, "close": 105.0, "open": 0})
-        # self.__np_assert_almost_equal(sync_vec, basket.now()["value"])
-        self.assertAlmostEqual(sync_vec, basket.now()["value"])
+        # print (basket.now())
+        self.assertEqual(basket_slice, basket.now()["value"])
+        # print basket.get_panel().ix[-1]
 
         bar4.add({"timestamp": t1, "close": 102.0, "open": 0})
         bar5.add({"timestamp": t1, "close": 95.0, "open": 0})
@@ -179,15 +194,14 @@ class PipelineTest(TestCase):
 
         # sync_vec2 = np.array([[102.0, 95.0, 107.0, 101.0]])
         sync_vec2 = [[102.0, 95.0, 107.0, 101.0]]
-        self.assertAlmostEqual(sync_vec2, basket2.now()["value"])
-        # self.__np_assert_almost_equal(sync_vec2, basket2.now()["value"])
+        basket_slice2 = {"'bar4'": [102.0],
+                         "'bar5'": [95.0],
+                         "'bar6'": [107.0],
+                         "'bar7'": [101.0],
+                         }
 
-        # target_spread = np.array([[22.0, 0.0, 5.0, -4.0]])
-        target_spread = [[22.0, 0.0, 5.0, -4.0]]
-        self.assertAlmostEqual(target_spread, cross_basket_spread.now()["value"])
-        self.assertAlmostEqual(sync_vec, basket.now()["value"])
-        # self.__np_assert_almost_equal(target_spread, cross_basket_spread.now()["value"])
-        # self.__np_assert_almost_equal(sync_vec, basket.now()["value"])
+        self.assertEqual(basket_slice2, basket2.now()["value"] )
+
 
 
     # def test_nan_before_size(self):
