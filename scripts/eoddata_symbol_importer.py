@@ -64,8 +64,8 @@ def read_eod_and_import(file_name, exchange, ccy = 'USD'):
 
 
 
-read_eod_and_import(sehk, 'SEHK', 'HKD')
-# read_eod_and_import(arca, 'ARCA', 'USD')
+#read_eod_and_import(sehk, 'SEHK', 'HKD')
+read_eod_and_import(arca, 'ARCA', 'USD')
 # read_eod_and_import(nasdaq, 'NASDAQ', 'USD')
 #read_eod_and_import(nyse, 'NYSE', 'USD')
 
