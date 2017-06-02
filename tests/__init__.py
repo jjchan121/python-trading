@@ -16,7 +16,7 @@ test_override = {
         }
     },
     "Feed": {"CSV":
-                 {"path": "/mnt/data/dev/workspaces/python-trading/data/tradedata"}
+                 {"path": "../data/tradedata"}
              }
 }
 
@@ -34,6 +34,6 @@ empty_config = Config({
         }
     },
     "Feed": {"CSV":
-                 {"path": "/mnt/data/dev/workspaces/python-trading/data/tradedata"}
+                 {"path": "../data/tradedata"}
              }
 })

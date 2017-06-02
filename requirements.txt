@@ -22,3 +22,6 @@ pyfolio
 
 nose
 nose_parameterized
+google.protobuf
+bidict
+tzlocal
