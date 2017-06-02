@@ -1,5 +1,5 @@
 from gevent import monkey
-# monkey.patch_all(Event=True)
+#monkey.patch_all(Event=True)
 
 
 import re
@@ -22,6 +22,7 @@ arca = '../data/refdata/eoddata/AMEX.txt'
 sehk = '../data/refdata/eoddata/HKEX.txt'
 nasdaq = '../data/refdata/eoddata/NASDAQ.txt'
 nyse = '../data/refdata/eoddata/NYSE.txt'
+hsi = '../data/refdata/eoddata/HSI_cons.txt'
 
 
 app_context = app_context()
@@ -64,13 +65,16 @@ def read_eod_and_import(file_name, exchange, ccy = 'USD'):
 
 
 
-read_eod_and_import(sehk, 'SEHK', 'HKD')
-# read_eod_and_import(arca, 'ARCA', 'USD')
-# read_eod_and_import(nasdaq, 'NASDAQ', 'USD')
+# read_eod_and_import(sehk, 'SEHK', 'HKD')
+#read_eod_and_import(arca, 'ARCA', 'USD')
+# read_eod_and_import(nasdaq, 'SMART', 'USD')
 #read_eod_and_import(nyse, 'NYSE', 'USD')
+read_eod_and_import(hsi, 'SEHK', 'HKD')
 
 
 # import_inst_from_ib(broker=broker, symbol='VXX', exchange='ARCA', currency='USD')
 
 # for inst in app_context.ref_data_mgr.get_all_insts():
 #     print inst
+# if ref_data_mgr.get_inst(symbol='VXX') is None:
+#     import_inst_from_ib(broker=broker, symbol="VXX", exchange="ARCA", currency="USD")

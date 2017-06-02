@@ -25,3 +25,15 @@ class PandasMemoryDataFeedConfig(FeedConfig):
     def __init__(self, dict_df=None):
         super(PandasMemoryDataFeedConfig, self).__init__(PandasMemoryDataFeedConfig.__class__.__name__)
         self.dict_df = dict_df if dict_df is not None else {}
+
+
+class QuandlFeedConfig(FeedConfig):
+    __slots__ = (
+        'api_key',
+    )
+
+    def __init__(self, api_key=None):
+        super(QuandlFeedConfig, self).__init__(QuandlFeedConfig.__class__.__name__)
+        self.api_key = api_key
+
+

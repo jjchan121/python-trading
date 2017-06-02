@@ -1,4 +1,4 @@
-from gevent import monkey
+from gevent import monkey, sleep
 from gevent.event import Event, AsyncResult
 import gevent
 monkey.patch_all()
@@ -41,15 +41,19 @@ def init_ib(app_context):
 
 
 def import_inst_from_ib(broker, symbol, sec_type='STK', exchange=None, currency=None):
-    try:
-        result = AsyncResult()
-        logger.info("importing symbol %s" % symbol)
-        broker.reqContractDetails(symbol=symbol, sec_type=sec_type, exchange=exchange, currency=currency, callback=result)
-        # broker.reqScannerSubscription(inst_type='STK', location_code='STK.US', scan_code='TOP_PERC_GAIN', above_vol=1000000, callback=callback)
+    for i in range(5):
+        try:
+            result = AsyncResult()
+            logger.info("importing symbol %s" % symbol)
+            broker.reqContractDetails(symbol=symbol, sec_type=sec_type, exchange=exchange, currency=currency, callback=result)
+            # broker.reqScannerSubscription(inst_type='STK', location_code='STK.US', scan_code='TOP_PERC_GAIN', above_vol=1000000, callback=callback)
 
-        logger.info("done %s %s" % (symbol, result.get(timeout=3)))
-    except Exception as e:
-        logger.error("faile to import %s", symbol, e)
+            logger.info("done %s %s" % (symbol, result.get(timeout=10)))
+        except Exception as e:
+            logger.error("faile to import %s", symbol, e)
+
+        else:
+            break
 
 
 

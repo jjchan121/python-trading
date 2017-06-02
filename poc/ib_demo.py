@@ -179,8 +179,8 @@ class SwigIBClient(EWrapper):
     def create_contract(self):
         # Simple contract for GOOG
         contract = Contract()
-        contract.exchange = "SMART"
-        contract.symbol = "GOOG"
+        contract.exchange = "NYSE"
+        contract.symbol = "AA"
         contract.secType = "STK"
         contract.currency = "USD"
         return contract
@@ -192,7 +192,7 @@ class SwigIBClient(EWrapper):
 
         # Perform the request
         self.tws.reqContractDetails(
-            42,  # reqId,
+            43,  # reqId,
             contract,  # contract,
         )
 
@@ -303,4 +303,5 @@ if __name__ == "__main__":
     ib.connect()
     contract = ib.create_contract()
 
-    ib.request_hist_data(contract)
+    # ib.request_hist_data(contract)
+    ib.request_contract_details(contract)

@@ -55,10 +55,38 @@ class BacktestRunner(Application):
 
 
 def main():
-    backtest_config = BacktestingConfig(id="down2%-test-config", stg_id="down2%",
+    # backtest_config = BacktestingConfig(id="down2%-test-config", stg_id="down2%",
+    #                                     stg_cls='algotrader.strategy.down_2pct_strategy.Down2PctStrategy',
+    #                                     portfolio_id='test', portfolio_initial_cash=100000,
+    #                                     instrument_ids=[4],
+    #                                     subscription_types=[
+    #                                         BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
+    #                                     from_date=date(2010, 1, 1), to_date=date.today(),
+    #                                     broker_id=Broker.Simulator,
+    #                                     feed_id=Feed.CSV,
+    #                                     stg_configs={'qty': 1000},
+    #                                     ref_data_mgr_type=RefDataManager.InMemory, persistence_config= PersistenceConfig(), provider_configs=[CSVFeedConfig(path='../../data/tradedata')])
+
+    # backtest_config = BacktestingConfig(id="down2%-test-config", stg_id="down2%8",
+    #                                     stg_cls='algotrader.strategy.down_2pct_strategy.Down2PctStrategy',
+    #                                     portfolio_id='test', portfolio_initial_cash=100000,
+    #                                     instrument_ids=[3348],
+    #                                     subscription_types=[
+    #                                         BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
+    #                                     from_date=date(2010, 1, 1), to_date=date.today(),
+    #                                     broker_id=Broker.Simulator,
+    #                                     feed_id=Feed.CSV,
+    #                                     stg_configs={'qty': 1000},
+    #                                     ref_data_mgr_type=RefDataManager.DB,
+    #                                     persistence_config= backtest_mongo_persistance_config(),
+    #                                     provider_configs=[MongoDBConfig(), CSVFeedConfig(path='../../data/tradedata')])
+    # app_context = ApplicationContext(app_config=backtest_config)
+
+
+    backtest_config = BacktestingConfig(id="down2%-test-config", stg_id="down2%9",
                                         stg_cls='algotrader.strategy.down_2pct_strategy.Down2PctStrategy',
                                         portfolio_id='test', portfolio_initial_cash=100000,
-                                        instrument_ids=[1],
+                                        instrument_ids=[3348],
                                         subscription_types=[
                                             BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.D1)],
                                         from_date=date(2010, 1, 1), to_date=date.today(),
@@ -66,7 +94,8 @@ def main():
                                         feed_id=Feed.CSV,
                                         stg_configs={'qty': 1000},
                                         ref_data_mgr_type=RefDataManager.DB,
-                                        persistence_config= backtest_mongo_persistance_config(),
+                                        # persistence_config= backtest_mongo_persistance_config(),
+                                        persistence_config= backtest_in_memory_config(),
                                         provider_configs=[MongoDBConfig(), CSVFeedConfig(path='../../data/tradedata')])
     app_context = ApplicationContext(app_config=backtest_config)
 

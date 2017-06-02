@@ -73,6 +73,23 @@ class Kurt(RollingApply):
                                      length=length,
                                      input_key=input_key, desc=desc)
 
+
+class Highest(RollingApply):
+    def __init__(self, input, input_key='close', length=30, desc="Rolling Highest"):
+        super(Highest, self).__init__(input,
+                                     func=lambda x: np.max(x),
+                                     name=Indicator.get_name(Highest.__name__, input, input_key, length),
+                                     length=length,
+                                     input_key=input_key, desc=desc)
+
+class Lowest(RollingApply):
+    def __init__(self, input, input_key='close', length=30, desc="Rolling Lowest"):
+        super(Lowest, self).__init__(input,
+                                     func=lambda x: np.min(x),
+                                     name=Indicator.get_name(Lowest.__name__, input, input_key, length),
+                                     length=length,
+                                     input_key=input_key, desc=desc)
+
 #
 #
 # from jinja2 import Template
@@ -85,6 +102,12 @@ class Kurt(RollingApply):
 #                                      length=length,
 #                                      input_key=input_key, desc=desc)
 # """)
+#
+# print rollingTmp.render({"className": "Highest",
+#                          "func": "lambda x: np.max(x)"})
+#
+# print rollingTmp.render({"className": "Lowest",
+#                          "func": "lambda x: np.min(x)"})
 #
 # print rollingTmp.render({"className": "Skew",
 #                          "func" : "lambda x: pd_skew_wrapper(x)"})

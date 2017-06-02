@@ -17,40 +17,45 @@ from algotrader.utils.clock import Clock
 
 
 class ATSRunner(Application):
+    def __init__(self):
+        pass
+
     def init(self):
         logger.info("starting ATS")
+        self.app_config = self.app_context.app_config
+        self.portfolio = self.app_context.portf_mgr.get_or_new_portfolio(self.app_config.portfolio_id, 1000000)
 
-        self.app_config = self.app_config
-        self.app_context = ApplicationContext(app_config=self.app_config)
-        self.app_context.start()
 
-        self.portfolio = self.app_context.portf_mgr.get_or_new_portfolio(self.app_config.portfolio_id,
-                                                                         self.app_config.portfolio_initial_cash)
+        self.initial_result = self.portfolio.get_result()
+
         self.app_context.add_startable(self.portfolio)
 
         self.strategy = self.app_context.stg_mgr.get_or_new_stg(self.app_config)
         self.app_context.add_startable(self.strategy)
 
     def run(self):
+        self.app_context.start()
         self.strategy.start(self.app_context)
 
         logger.info("ATS started, presss Ctrl-C to stop")
 
-
+from algotrader.strategy.simple_market_making import SimpleMarketMaking
 
 def main():
     broker_config = IBConfig(client_id=2)
     live_trading_config = LiveTradingConfig(id=None,
-                                            stg_id="down2%",
-                                            stg_cls='algotrader.strategy.down_2pct_strategy.Down2PctStrategy',
+                                            stg_id="nativeMM",
+                                            stg_cls='algotrader.strategy.simple_market_making.SimpleMarketMaking',
                                             portfolio_id='test',
-                                            instrument_ids=[4],
+                                            instrument_ids=['SPY@ARCA'],
                                             subscription_types=[
                                                 BarSubscriptionType(bar_type=BarType.Time, bar_size=BarSize.M1)],
                                             feed_id=Broker.IB,
                                             broker_id=Broker.IB,
-                                            ref_data_mgr_type = RefDataManager.DB, clock_type = Clock.RealTime, persistence_config =PersistenceConfig(),
-                                            configs = [broker_config])
+                                            ref_data_mgr_type = RefDataManager.DB,
+                                           # clock_type = Clock.RealTime,
+                                            persistence_config =PersistenceConfig())#,
+                                            # configs = [broker_config])
 
     app_context = ApplicationContext(app_config=live_trading_config)
     ATSRunner().start(app_context)

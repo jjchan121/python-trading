@@ -74,9 +74,15 @@ def main():
 
     instruments = [3348]
 
-    backtest_config = BacktestingConfig(id="sma", stg_id='test_sma1',
-                                    # stg_cls='algotrader.strategy.sma_strategy.SMAStrategy',
-                                    stg_cls='algotrader.strategy.down_2pct_strategy.Down2PctStrategy',
+    # persistence_config = PersistenceConfig(None,
+    #                                        DataStore.InMemoryDB, PersistenceMode.RealTime,
+    #                                        DataStore.InMemoryDB, PersistenceMode.RealTime,
+    #                                        DataStore.InMemoryDB, PersistenceMode.RealTime,
+    #                                        DataStore.InMemoryDB, PersistenceMode.RealTime)
+
+    backtest_config = BacktestingConfig(id="sma", stg_id='test_sma3',
+                                    stg_cls='algotrader.strategy.sma_strategy.SMAStrategy',
+                                    #stg_cls='algotrader.strategy.down_2pct_strategy.Down2PctStrategy',
                                     portfolio_id='test2', portfolio_initial_cash=100000,
                                     instrument_ids=instruments,
                                     subscription_types=[
@@ -88,7 +94,8 @@ def main():
                                     feed_id=Feed.PandasMemory,
                                     stg_configs={'qty': 1000},
                                     ref_data_mgr_type=RefDataManager.DB,
-                                    persistence_config= backtest_mongo_persistance_config(),
+                                    # persistence_config= backtest_mongo_persistance_config(),
+                                    persistence_config= backtest_in_memory_config(),
                                     provider_configs=PandasMemoryDataFeedConfig(dict_df=dict_df))
 
     app_context = ApplicationContext(app_config=backtest_config)

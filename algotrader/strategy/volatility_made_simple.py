@@ -5,6 +5,7 @@ from algotrader.event.order import OrdAction
 from algotrader.strategy.strategy import Strategy
 from algotrader.technical.talib_wrapper import EMA, SMA
 from algotrader.utils import logger
+from algotrader.technical.pipeline.pairwise import Divides
 
 
 class VixVxvRatio(Strategy):
@@ -27,11 +28,20 @@ class VixVxvRatio(Strategy):
         self.vxv_bar = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % self.vxv.get_symbol())  # non tradable
         self.xiv_bar = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % self.xiv.get_symbol())
         self.vxx_bar = app_context.inst_data_mgr.get_series("Bar.%s.Time.86400" % self.vxx.get_symbol())
-        self.vix_strm = BehaviorSubject(0)
-        self.vxv_strm = BehaviorSubject(0)
-        self.ratio_strm = rx.Observable \
-            .zip(self.vix_strm, self.vxv_strm, lambda x, y: x / y) \
-            .subscribe(self.on_ratio)
+
+        self.vix_bar.start(self.app_context)
+        self.vxv_bar.start(self.app_context)
+        self.xiv_bar.start(self.app_context)
+        self.vxx_bar.start(self.app_context)
+
+        self.ratio = Divides(self.vix_bar, self.vxv_bar)
+        self.ratio.start(self.app_context)
+
+        # self.vix_strm = BehaviorSubject(0)
+        # self.vxv_strm = BehaviorSubject(0)
+        # self.ratio_strm = rx.Observable \
+        #     .zip(self.vix_strm, self.vxv_strm, lambda x, y: x / y) \
+        #     .subscribe(self.on_ratio)
 
         super(VixVxvRatio, self)._start(app_context, **kwargs)
 
@@ -39,25 +49,27 @@ class VixVxvRatio(Strategy):
         super(VixVxvRatio, self)._stop()
 
     def on_bar(self, bar):
-        if bar.inst_id == self.vix.id():
-            self.vix_strm.on_next(bar.close)
-        elif bar.inst_id == self.vxv.id():
-            self.vxv_strm.on_next(bar.close)
+        # if bar.inst_id == self.vix.id():
+        #     self.vix_strm.on_next(bar.close)
+        # elif bar.inst_id == self.vxv.id():
+        #     self.vxv_strm.on_next(bar.close)
+        pass
 
-    def on_ratio(self, ratio):
-        # what is order is not filled and there is signal again?
-        if self.order is None:
-            # long XIV at the close when VIX index closed below the VXV index
-            # long XIV when ratio < 0.92
-            if ratio < self.threshold[0]:
-                # logger.info("%s,B,%.2f" % (bar.timestamp, bar.close))
-                self.order = self.market_order(inst_id=self.xiv.id(),
-                                               action=OrdAction.BUY,
-                                               qty=self.qty)
-            # long VXX when ratio > 1.08
-            elif ratio > self.threshold[1]:
-                # logger.info("%s,B,%.2f" % (bar.timestamp, bar.close))
-                self.order = self.market_order(inst_id=self.vxx, action=OrdAction.BUY, qty=self.qty)
+
+    # def on_ratio(self, ratio):
+    #     # what is order is not filled and there is signal again?
+    #     if self.order is None:
+    #         # long XIV at the close when VIX index closed below the VXV index
+    #         # long XIV when ratio < 0.92
+    #         if ratio < self.threshold[0]:
+    #             # logger.info("%s,B,%.2f" % (bar.timestamp, bar.close))
+    #             self.order = self.market_order(inst_id=self.xiv.id(),
+    #                                            action=OrdAction.BUY,
+    #                                            qty=self.qty)
+    #         # long VXX when ratio > 1.08
+    #         elif ratio > self.threshold[1]:
+    #             # logger.info("%s,B,%.2f" % (bar.timestamp, bar.close))
+    #             self.order = self.market_order(inst_id=self.vxx, action=OrdAction.BUY, qty=self.qty)
 
 
 class VxvVxmtRatio(Strategy):

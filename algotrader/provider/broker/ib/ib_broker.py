@@ -196,7 +196,7 @@ class IBBroker(IBSocket, Broker, Feed):
 
             if ok and (not self.tws or not self.tws.isConnected()):
                 ok = False
-            gevent.sleep(0)
+            gevent.sleep(1)
 
     def _stop(self):
         self.tws.eDisconnect()
@@ -677,7 +677,8 @@ class IBBroker(IBSocket, Broker, Feed):
                      sd.multiplier, sd.currency, sd.localSymbol, sd.secIdType,
                      sd.secId, sd.includeExpired, sd.comboLegsDescrip, sd.comboLegs,
                      sd.underComp,
-                     cd.marketName, cd.tradingClass, cd.minTick, cd.orderTypes,
+                     cd.marketName, #cd.tradingClass,
+                     cd.minTick, cd.orderTypes,
                      cd.validExchanges, cd.priceMagnifier, cd.underConId, cd.longName,
                      cd.longName, cd.contractMonth, cd.industry, cd.category,
                      cd.timeZoneId, cd.tradingHours, cd.liquidHours, cd.evRule,

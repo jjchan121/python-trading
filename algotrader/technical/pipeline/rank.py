@@ -7,7 +7,7 @@ from algotrader.utils import logger
 
 class Rank(PipeLine):
     __slots__ = (
-        'ascending'
+        'ascending',
     )
 
     def __init__(self, inputs=None, ascending=True, input_key='close', desc="Rank"):
@@ -20,9 +20,10 @@ class Rank(PipeLine):
         super(Rank, self).on_update(data)
         result = {}
         result['timestamp'] = data['timestamp']
-        if self.all_filled():
+
+        if self.fire_on_all and self.all_filled():
             df = pd.DataFrame(self.cache)
-            result[PipeLine.VALUE] = ((df.rank(axis=1, ascending=self.ascending) - 1)/(df.shape[1]-1)).tail(1).values.tolist()
+            result[PipeLine.VALUE] = ((df.rank(axis=1, ascending=self.ascending) - 1)/(df.shape[1]-1)).tail(1).to_dict('list')
         else:
             result[PipeLine.VALUE] = self._default_output()
 

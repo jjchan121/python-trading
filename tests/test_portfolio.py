@@ -1,3 +1,4 @@
+from __future__ import absolute_import # IntelliJ/ Pycharm workaround http://stackoverflow.com/questions/38569992/pycharm-import-runtimewarning-after-updating-to-2016-2
 from collections import defaultdict
 from unittest import TestCase
 

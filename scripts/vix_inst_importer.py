@@ -20,13 +20,13 @@ from algotrader.config.persistence import MongoDBConfig, PersistenceConfig
 # from algotrader.config.trading import BacktestingConfig
 from algotrader.event.market_data import Bar
 from algotrader.event.order import NewOrderRequest, OrdAction, OrdType
-from algotrader.provider.persistence import PersistenceMode
-from algotrader.provider.persistence.data_store import DataStore
 from algotrader.provider.persistence.mongodb import MongoDBDataStore
 from algotrader.trading.account_mgr import AccountManager
+from algotrader.provider.persistence import PersistenceMode
+from algotrader.provider.persistence.data_store import DataStore
 from algotrader.trading.context import ApplicationContext
-from algotrader.trading.portfolio import Portfolio
 from algotrader.trading.seq_mgr import SequenceManager
+from algotrader.trading.portfolio import Portfolio
 from algotrader.utils.ser_deser import JsonSerializer, MapSerializer
 from algotrader.provider.feed import Feed
 
@@ -283,8 +283,27 @@ def build_vix_future(expiry_date_str, seq_mgr):
 
 
 
+def import_vix_index():
+    context = get_default_app_context()
+    # 6,VIX,IDX,VIX,CBOE,USD
+    client = MongoClient('localhost', 27017)
 
-def import_vix_future():
+    store = context.provider_mgr.get(DataStore.Mongo)
+    store.start(app_context=context)
+
+    ref_data_mgr = context.ref_data_mgr
+    ref_data_mgr.start(app_context=context)
+
+    seq_mgr = SequenceManager()
+    seq_mgr.start(app_context=context)
+    inst_id = seq_mgr.get_next_sequence("instruments")
+    inst = Instrument(inst_id, name="VIX", type=InstType.Index, symbol='VIX', exch_id='CBOE', ccy_id='USD')
+    ref_data_mgr.add_inst(inst)
+    ref_data_mgr.save_all()
+
+
+
+def add_spy():
     context = get_default_app_context()
     client = MongoClient('localhost', 27017)
 
@@ -296,12 +315,10 @@ def import_vix_future():
 
     seq_mgr = SequenceManager()
     seq_mgr.start(app_context=context)
-
-    for ex in vix_expiries:
-        inst = build_vix_future(ex, seq_mgr)
-        ref_data_mgr.add_inst(inst)
+    inst_id = seq_mgr.get_next_sequence("instruments")
+    inst = Instrument(inst_id, name="SPDR S&P 500 ETF", type=InstType.ETF, symbol='SPY', exch_id='ARCA', ccy_id='USD')
+    ref_data_mgr.add_inst(inst)
     ref_data_mgr.save_all()
-
 
 # setup_exchange_currency()
 # test_get()
@@ -332,8 +349,81 @@ import_eod_nyse()
 #
 # db.sequences.update(
 # { _id: "instruments"},
-#  { $set:
-#  { seq : 161}})
+# { $set:
+# { seq : 3349}})
+
+
+
+
+def import_vix_future():
+    context = get_default_app_context()
+    client = MongoClient('localhost', 27017)
+
+    store = context.provider_mgr.get(DataStore.Mongo)
+    store.start(app_context=context)
+
+    ref_data_mgr = context.ref_data_mgr
+    ref_data_mgr.start(app_context=context)
+
+    seq_mgr = SequenceManager()
+    seq_mgr.start(app_context=context)
+
+    for ex in vix_expiries:
+        inst = build_vix_future(ex, seq_mgr)
+        ref_data_mgr.add_inst(inst)
+    ref_data_mgr.save_all()
+
+
+def add_spy():
+    context = get_default_app_context()
+    client = MongoClient('localhost', 27017)
+
+    store = context.provider_mgr.get(DataStore.Mongo)
+    store.start(app_context=context)
+
+    ref_data_mgr = context.ref_data_mgr
+    ref_data_mgr.start(app_context=context)
+
+    seq_mgr = SequenceManager()
+    seq_mgr.start(app_context=context)
+    inst_id = seq_mgr.get_next_sequence("instruments")
+    inst = Instrument(inst_id, name="SPDR S&P 500 ETF", type=InstType.ETF, symbol='SPY', exch_id='ARCA', ccy_id='USD')
+    ref_data_mgr.add_inst(inst)
+    ref_data_mgr.save_all()
+
+# setup_exchange_currency()
+# test_get()
+
+# import_vix_future()
+
+# with open('/Users/jchan/workspace/data/NYSE.txt') as f:
+
+
+def import_eod_nyse():
+    nysedef = pd.read_csv('/Users/jchan/workspace/data/NYSE.txt', delimiter='\t')
+
+    for index, row in nysedef.iterrows():
+        print row
+        inst_id = seq_mgr.get_next_sequence("instruments")
+        inst = Instrument(inst_id, name=row['Description'], type=InstType.Stock, symbol=row['Symbol'], exch_id='NYSE', ccy_id='USD')
+        ref_data_mgr.add_inst(inst)
+
+    ref_data_mgr.save_all()
+
+import_eod_nyse()
+
+#
+# in case need to syn back the instruments sequences, do the following:
+#
+# find the max of inst_id by
+# db.instruments.distinct("__slots__.inst_id")
+# #
+"""
+db.sequences.update(
+{ _id: "instruments"},
+{ $set:
+{ seq : 5178}})
+"""
 
 
 

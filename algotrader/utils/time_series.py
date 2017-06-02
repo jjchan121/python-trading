@@ -249,7 +249,8 @@ class DataSeries(Persistable, Startable, HasId):
     #
     # def __rmul__(self, other):
     #     return Times(other, self, self.keys)
-
+    # def __gt__(self, other):
+    #     if isinstance(other, float):
 
     def __getitem__(self, pos):
         if isinstance(pos, tuple):

@@ -29,7 +29,7 @@ class StrategyPersistenceTest(TestCase):
                                             feed_id=Feed.CSV,
                                             stg_configs={'qty': 1000},
                                             ref_data_mgr_type=RefDataManager.InMemory, persistence_config=PersistenceConfig(),
-                                             provider_configs=CSVFeedConfig(path='data/tradedata')
+                                             provider_configs=CSVFeedConfig(path='../data/tradedata')
                                             )
         app_context0 = ApplicationContext(app_config=backtest_config0)
         runner = BacktestRunner(isplot = False)
@@ -56,7 +56,7 @@ class StrategyPersistenceTest(TestCase):
                                                                ts_persist_mode=PersistenceMode.Batch,
                                                                trade_ds_id=DataStore.InMemoryDB,
                                                                trade_persist_mode=PersistenceMode.Batch),
-                                             provider_configs=CSVFeedConfig(path='data/tradedata'))
+                                             provider_configs=CSVFeedConfig(path='../data/tradedata'))
         app_context1 = ApplicationContext(app_config=backtest_config1)
         runner1 = BacktestRunner(isplot = False)
         runner1.start(app_context1)
@@ -81,7 +81,7 @@ class StrategyPersistenceTest(TestCase):
                                                           ts_persist_mode=PersistenceMode.Batch,
                                                           trade_ds_id=DataStore.InMemoryDB,
                                                           trade_persist_mode=PersistenceMode.Batch),
-                                             provider_configs=CSVFeedConfig(path='data/tradedata'))
+                                             provider_configs=CSVFeedConfig(path='../data/tradedata'))
         app_context2 = ApplicationContext(app_config=backtest_config2)
         app_context2.start()
         db = app_context2.get_seq_data_store()
