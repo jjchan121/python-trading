@@ -1,5 +1,5 @@
 import abc
-
+import pandas as pd
 from algotrader.config.config import Config
 
 
@@ -19,10 +19,10 @@ class CSVFeedConfig(FeedConfig):
 
 class PandasMemoryDataFeedConfig(FeedConfig):
     __slots__ = (
-        'dict_df',
+        'df',
     )
 
-    def __init__(self, dict_df=None):
+    def __init__(self, df=None):
         super(PandasMemoryDataFeedConfig, self).__init__(PandasMemoryDataFeedConfig.__class__.__name__)
         self.dict_df = dict_df if dict_df is not None else {}
 
@@ -35,5 +35,4 @@ class QuandlFeedConfig(FeedConfig):
     def __init__(self, api_key=None):
         super(QuandlFeedConfig, self).__init__(QuandlFeedConfig.__class__.__name__)
         self.api_key = api_key
-
-
+        self.df = df if df is not None else pd.DataFrame()

@@ -55,5 +55,3 @@ def import_inst_from_ib(broker, symbol, sec_type='STK', exchange=None, currency=
         else:
             break
 
-
-

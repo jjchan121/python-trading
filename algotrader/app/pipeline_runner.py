@@ -84,9 +84,9 @@ def main():
     with open(file, 'rb') as f:
         df_dict = pickle.load(f)
 
-    for k,df in df_dict.iteritems():
-        df['Symbol'] = k
-        df['BarSize'] = int(BarSize.D1)
+    # for k,df in df_dict.iteritems():
+    #     df['Symbol'] = k
+    #     df['BarSize'] = int(BarSize.D1)
 
     screen = AlphaFormulaScreen(pipe_id='alpha_formula1', pipe_configs=None)
 
